@@ -1,0 +1,82 @@
+heat_template_version: 2015-04-30
+
+description: >
+  backend instance. Version 0.1
+
+parameters:
+
+  key_name:
+    type: string
+    label: Key name
+    description: Name of key-pair to be used for compute instance
+
+  instance_flavor:
+    type: string
+    label: Instance Type
+    description: Type of instance (flavor) to be used
+    
+  image_id:
+    type: string
+    label: Image ID
+    description: Image to be used for compute instance
+
+  security_group_backend_instances:
+    type: string
+    description: Frontend instances 
+    default: ssh
+        
+  availability_zone:
+    type: string
+    label: Availability zone
+    description: Name of the Availability zone
+    
+  hostname:
+    type: string
+    label: Instance hostname
+    description: Name of compute instance
+    default: frontend
+    
+  private_network:
+    type: string
+    label: Private network
+    description: Private network
+    
+resources:
+
+  privatenet_port:
+    type: OS::Neutron::Port
+    properties:
+      replacement_policy: AUTO
+      network: { get_param: private_network }
+      security_groups: [{ get_param: security_group_backend_instances}]
+
+  backend_instance:
+    type: OS::Nova::Server
+    depends_on: [ privatenet_port ]
+    properties:
+      flavor_update_policy: RESIZE
+      availability_zone : { get_param: availability_zone }
+      key_name: { get_param: key_name }
+      image: { get_param: image_id }
+      flavor: { get_param: instance_flavor }
+      name: { get_param: hostname }
+      networks:
+        - port: { get_resource: privatenet_port }
+      user_data: |
+        #!/bin/bash
+        for iface in 1 2
+        do
+        cat <<EOF >> /etc/sysconfig/network-scripts/ifcfg-eth$iface
+        DEVICE="eth$iface"
+        BOOTPROTO="dhcp"
+        ONBOOT="yes"
+        TYPE="Ethernet"
+        USERCTL="yes"
+        PEERDNS="no"
+        DEFROUTE="no"
+        IPV6INIT="no"
+        PERSISTENT_DHCLIENT="1"
+        EOF
+        done
+        systemctl restart network
+      user_data_format: RAW

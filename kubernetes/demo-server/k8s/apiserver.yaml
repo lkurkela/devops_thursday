@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apiserver
+  namespace: demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: apiserver
+  template:
+    metadata:
+      labels:
+        app: apiserver
+    spec:
+      containers:
+      - name: demo-apiserver
+        image: lkurkela/demo-apiserver:1.0
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
+        env:
+        - name: APISERVER_VERSION
+          value: "1.0"
+        resources:
+          limits:
+            memory: "200M"
+            cpu: "1"
+          requests:
+            memory: "100M"
+            cpu: "0.1"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apiserver
+  namespace: demo
+spec:
+  ports:
+  - port: 5000
+    targetPort: 5000
+    protocol: TCP
+  selector:
+    app: apiserver

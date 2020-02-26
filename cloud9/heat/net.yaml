@@ -1,0 +1,40 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Network template v0.0
+
+parameters:
+  private_network_name:
+    type: string
+    label: name of the private network
+  private_subnet_name:
+    type: string
+    label: name of the private subnet
+  private_subnet_cidr:
+    type: string
+    label: CIDR of the private subnet
+  private_allocation_start:
+    type: string
+    label: First address of the DHCP allocation pool private network
+  private_allocation_end:
+    type: string
+    label: Last address of the DHCP allocation pool private network
+
+resources:
+  private_network:
+    type: OS::Neutron::Net
+    properties:
+      admin_state_up: true
+      name: {get_param: private_network_name }
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      name: { get_param: private_subnet_name }
+      network_id: { get_resource: private_network }
+      enable_dhcp: true
+      gateway_ip: ~
+      cidr: { get_param: private_subnet_cidr }
+      dns_nameservers: [217.30.180.230, 217.30.182.230]
+      allocation_pools: [{"start": { get_param: private_allocation_start }, "end": { get_param: private_allocation_end }}]
+
+

@@ -1,0 +1,11 @@
+parameters:
+  env: backend-server
+  key_name: LasseMac
+  availability_zone: helsinki-2
+  private_network: Private-Network
+  image_id: "CentOS 7 LVM x86_64 (LATEST)"
+  instance_flavor: nbl-n1-tiny
+  host_count: 1
+   
+resource_registry:
+  ST::JB::KCOM: backend-common.yaml

@@ -1,0 +1,68 @@
+heat_template_version: 2013-05-23
+
+description: >
+  backend stack with ResourceGroup Version 0.1
+
+parameters:
+  env:
+    type: string
+    label: Environment
+    description: Enviroment to use
+
+  key_name:
+    type: string
+    label: Key name
+    description: Name of key-pair to be used for compute instance
+
+  instance_flavor:
+    type: string
+    label: Instance Type
+    description: Type of instance (flavor) to be used
+
+  image_id:
+    type: string
+    label: Image ID
+    description: Image to be used for compute instance
+
+  availability_zone:
+    type: string
+    label: Availability zone
+    description: Name of the Availability zone 
+    
+  private_network:
+    type: string
+    label: Private network
+    description: Private network
+
+  security_group_backend_instances:
+    type: string
+    description: Backend instances 
+    default: ssh
+
+  host_count:
+    type: number
+    label: Cluster size
+    description: Count of hosts on ResourceGroup.
+    default: 1
+
+resources:
+    
+  backend_hosts:
+    type: OS::Heat::ResourceGroup
+    properties:
+      count: { get_param: host_count }
+      resource_def:
+        type: ST::JB::KCOM
+        properties:
+          hostname:
+            Fn::Join:
+            - ""
+            - - { get_param: env }
+              - "-"
+              -  { get_param: availability_zone }
+              - "-%index%"
+          key_name: { get_param: key_name }
+          availability_zone: { get_param: availability_zone }
+          private_network: { get_param: private_network }
+          image_id: { get_param: image_id }
+          instance_flavor: { get_param: instance_flavor }

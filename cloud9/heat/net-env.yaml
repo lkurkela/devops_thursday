@@ -1,0 +1,6 @@
+parameters:
+  private_network_name: Private-Network
+  private_subnet_name: Private-Subnet
+  private_subnet_cidr: 192.168.1.0/24
+  private_allocation_start: 192.168.1.100
+  private_allocation_end: 192.168.1.250
